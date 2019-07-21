@@ -48,14 +48,15 @@ class SeBinding(models.AbstractModel):
 
     @api.multi
     def write(self, vals):
-        if (
-            "active" in vals
-            and not vals["active"]
-            and self.sync_state != "new"
-        ):
+        if vals.get("active", None) is False:
+            new_records = self.filtered(lambda s: s.sync_state == "new")
+            super(SeBinding, new_records).write(vals)
+            sync_records = self - new_records
             vals["sync_state"] = "to_update"
-        record = super(SeBinding, self).write(vals)
-        return record
+            super(SeBinding, sync_records).write(vals)
+            return True
+        else:
+            return super(SeBinding, self).write(vals)
 
     @api.multi
     def unlink(self):
