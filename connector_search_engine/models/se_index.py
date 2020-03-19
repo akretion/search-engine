@@ -4,9 +4,9 @@
 
 import logging
 
-from odoo import _, api, fields, models
+from openerp import _, api, fields, models
 
-from odoo.addons.queue_job.job import job
+from openerp.addons.queue_job.job import job
 
 _logger = logging.getLogger(__name__)
 try:
@@ -149,7 +149,7 @@ class SeIndex(models.Model):
 
     def resynchronize_all_bindings(self):
         """This method will iter on all item in the index of the search engine
-        if the corresponding binding do not exist on odoo it will create a job
+        if the corresponding binding do not exist on openerp it will create a job
         that delete all this obsolete items.
         You should not use this method for day to day job, it only an helper
         for recovering your index after a dammage.

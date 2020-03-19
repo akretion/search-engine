@@ -2,10 +2,10 @@
 # Copyright 2013 Akretion (http://www.akretion.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from openerp import _, api, fields, models
+from openerp.exceptions import UserError
 
-from odoo.addons.queue_job.job import job
+from openerp.addons.queue_job.job import job
 
 
 class SeBinding(models.AbstractModel):

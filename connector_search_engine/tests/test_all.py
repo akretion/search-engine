@@ -4,7 +4,7 @@
 
 import mock
 
-from odoo import exceptions
+from openerp import exceptions
 
 from .common import TestSeBackendCaseBase
 from .models import BindingResPartnerFake, ResPartnerFake, SeAdapterFake, SeBackendFake
