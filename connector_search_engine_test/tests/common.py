@@ -8,7 +8,7 @@ import mock
 import urlparse
 
 from openerp import tools
-from openerp.modules.module import get_resource_path
+from openerp.modules.module import get_module_resource
 
 from openerp.addons.component.tests.common import SavepointComponentCase
 
@@ -21,7 +21,7 @@ def load_xml(env, module, filepath):
         tools.convert_file(
             env.cr,
             module,
-            get_resource_path(module, filepath),
+            get_module_resource(module, filepath),
             {},
             mode="init",
             noupdate=False,

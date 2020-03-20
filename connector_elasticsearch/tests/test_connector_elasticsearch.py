@@ -6,10 +6,10 @@ from time import sleep
 
 from vcr_unittest import VCRMixin
 
-from odoo import exceptions
+from openerp import exceptions
 
-from odoo.addons.connector_search_engine.tests.models import SeBackendFake
-from odoo.addons.connector_search_engine.tests.test_all import TestBindingIndexBase
+from openerp.addons.connector_search_engine.tests.models import SeBackendFake
+from openerp.addons.connector_search_engine.tests.test_all import TestBindingIndexBase
 
 
 class TestConnectorElasticsearch(VCRMixin, TestBindingIndexBase):

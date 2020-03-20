@@ -7,10 +7,9 @@ from openerp import fields, models
 
 from openerp.addons.component.core import Component
 
-from .models_mixin import TestMixin
 
 
-class SeBackendFake(models.Model, TestMixin):
+class SeBackendFake(models.Model):
 
     _name = "se.backend.fake"
     _inherit = "se.backend.spec.abstract"
@@ -65,7 +64,7 @@ class SeAdapterFake(Component):
 # Fake partner binding
 
 
-class BindingResPartnerFake(models.Model, TestMixin):
+class BindingResPartnerFake(models.Model):
     _name = "res.partner.binding.fake"
     _inherit = ["se.binding"]
     _inherits = {"res.partner": "record_id"}
@@ -81,7 +80,7 @@ class BindingResPartnerFake(models.Model, TestMixin):
     )
 
 
-class ResPartnerFake(models.Model, TestMixin):
+class ResPartnerFake(models.Model):
     _name = "res.partner"
     _inherit = "res.partner"
     _test_teardown_no_delete = True

@@ -4,10 +4,10 @@
 
 import logging
 
-from odoo import _
-from odoo.exceptions import UserError
+from openerp import _
+from openerp.exceptions import UserError
 
-from odoo.addons.component.core import Component
+from openerp.addons.component.core import Component
 
 _logger = logging.getLogger(__name__)
 

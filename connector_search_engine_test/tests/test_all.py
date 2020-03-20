@@ -7,23 +7,14 @@ import mock
 from openerp import exceptions
 
 from .common import TestSeBackendCaseBase
-from .models import BindingResPartnerFake, ResPartnerFake, SeAdapterFake, SeBackendFake
+from ..models.models import SeAdapterFake
 
 
 class TestBindingIndexBase(TestSeBackendCaseBase):
     @classmethod
     def setUpClass(cls):
         super(TestBindingIndexBase, cls).setUpClass()
-        BindingResPartnerFake._test_setup_model(cls.env)
-        ResPartnerFake._test_setup_model(cls.env)
-        cls._load_fixture("ir_exports_test.xml")
-        cls.exporter = cls.env.ref("connector_search_engine.ir_exp_partner_test")
-
-    @classmethod
-    def tearDownClass(cls):
-        ResPartnerFake._test_teardown_model(cls.env)
-        BindingResPartnerFake._test_teardown_model(cls.env)
-        super(TestBindingIndexBase, cls).tearDownClass()
+        cls.exporter = cls.env.ref("connector_search_engine_test.ir_exp_partner_test")
 
     @classmethod
     def _prepare_index_values(cls, backend=None):
@@ -32,7 +23,7 @@ class TestBindingIndexBase(TestSeBackendCaseBase):
             "name": "Partner Index",
             "backend_id": backend.id,
             "model_id": cls.env.ref(
-                "connector_search_engine.model_res_partner_binding_fake"
+                "connector_search_engine_test.model_res_partner_binding_fake"
             ).id,
             "lang_id": cls.env.ref("base.lang_en").id,
             "exporter_id": cls.exporter.id,
@@ -44,16 +35,17 @@ class TestBindingIndexBase(TestSeBackendCaseBase):
         # create an index for partner model
         cls.se_index = cls.se_index_model.create(cls._prepare_index_values(backend))
         # create a binding + partner alltogether
-        cls.binding_model = cls.env[BindingResPartnerFake._name]
+        cls.binding_model = cls.env["res.partner.binding.fake"]
         cls.partner_binding = cls.binding_model.create(
             {
                 "name": "Marty McFly",
                 "country_id": cls.env.ref("base.us").id,
                 "email": "marty.mcfly@future.com",
                 "child_ids": [
-                    (0, 0, {"name": "Doc Brown", "email": "docbrown@future.com"})
+                    (0, 0, {"name": "Doc Brown", "email": "docbrown@future.com", "country_id": cls.env.ref("base.us").id})
                 ],
                 "index_id": cls.se_index.id,
+                "lang": "en_US",
             }
         )
         cls.partner = cls.partner_binding.record_id
@@ -63,17 +55,10 @@ class TestBindingIndexBaseFake(TestBindingIndexBase):
     @classmethod
     def setUpClass(cls):
         super(TestBindingIndexBaseFake, cls).setUpClass()
-        SeAdapterFake._build_component(cls._components_registry)
-        SeBackendFake._test_setup_model(cls.env)
-        cls.fake_backend_model = cls.env[SeBackendFake._name]
+        cls.fake_backend_model = cls.env["se.backend.fake"]
         cls.backend_specific = cls.fake_backend_model.create({"name": "Fake SE"})
         cls.backend = cls.backend_specific.se_backend_id
         cls.setup_records()
-
-    @classmethod
-    def tearDownClass(cls):
-        SeBackendFake._test_teardown_model(cls.env)
-        super(TestBindingIndexBaseFake, cls).tearDownClass()
 
 
 class TestBindingIndex(TestBindingIndexBaseFake):
@@ -240,19 +225,19 @@ class TestBindingIndex(TestBindingIndexBaseFake):
         self.partner_binding.sync_state = "to_update"
         with self.assertRaises(exceptions.UserError) as err:
             self.partner_binding.unlink()
-        self.assertIn("wait until it's synchronized.", err.exception.name)
+        self.assertIn("wait until it's synchronized.", err.exception.__str__())
 
     def test_unlink_to_upgrade_active_binding(self):
         self.partner_binding.sync_state = "to_update"
         with self.assertRaises(exceptions.UserError) as err:
             self.partner_binding.unlink()
-        self.assertIn("unactivate it first", err.exception.name)
+        self.assertIn("unactivate it first", err.exception.__str__())
 
     def test_unlink_done_active_binding(self):
         self.partner_binding.sync_state = "done"
         with self.assertRaises(exceptions.UserError) as err:
             self.partner_binding.unlink()
-        self.assertIn("unactivate it first", err.exception.name)
+        self.assertIn("unactivate it first", err.exception.__str__())
 
     def test_inactive_binding_change_state(self):
         self.partner_binding.sync_state = "done"

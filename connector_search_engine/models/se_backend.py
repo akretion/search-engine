@@ -17,7 +17,7 @@ class SeBackend(models.Model):
     # In next version, the field is removed from connector.backend, so we
     # do not have this issue. Also a related field have been added on
     # se.backend.spec.abstract, this field is also removed in next version
-    name = fields.Char(required=False)
+#    name = fields.Char(required=False)
     specific_model = fields.Selection(
         string="Type", selection="_select_specific_model", required=True, readonly=True
     )
@@ -30,7 +30,6 @@ class SeBackend(models.Model):
     )
 
     @api.model
-    @tools.ormcache("self")
     def _select_specific_model(self):
         """Retrieve available specific models via matchin prefix.
 
@@ -45,10 +44,9 @@ class SeBackend(models.Model):
         )
         # we check if the model exist in the env
         # indeed during module upgrade the model may not exist yet
-        return [(x.model, x.name) for x in models if x.model in self.env]
+        return [(x.model, x.name) for x in models if x.model in self.env.registry.models]
 
     @api.model
-    @tools.ormcache("self")
     def _select_specific_backend(self):
         """Retrieve available specific backends."""
         res = []

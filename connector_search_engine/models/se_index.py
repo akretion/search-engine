@@ -27,8 +27,8 @@ class SeIndex(models.Model):
     @api.model
     def _get_model_domain(self):
         se_model_names = []
-        for model in self.env:
-            if self.env[model]._abstract or self.env[model]._transient:
+        for model in self.env.registry.models:
+            if not self.env[model]._auto or self.env[model]._transient:
                 continue
             if hasattr(self.env[model], "_se_model"):
                 se_model_names.append(model)
