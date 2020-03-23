@@ -8,8 +8,7 @@ from vcr_unittest import VCRMixin
 
 from openerp import exceptions
 
-from openerp.addons.connector_search_engine.tests.models import SeBackendFake
-from openerp.addons.connector_search_engine.tests.test_all import TestBindingIndexBase
+from openerp.addons.connector_search_engine_test.tests.test_all import TestBindingIndexBase
 
 
 class TestConnectorElasticsearch(VCRMixin, TestBindingIndexBase):
@@ -22,8 +21,7 @@ class TestConnectorElasticsearch(VCRMixin, TestBindingIndexBase):
         cls.setup_records()
         with cls.backend_specific.work_on("se.index", index=cls.se_index) as work:
             cls.adapter = work.component(usage="se.backend.adapter")
-        SeBackendFake._test_setup_model(cls.env)
-        cls.fake_backend_model = cls.env[SeBackendFake._name]
+        cls.fake_backend_model = cls.env["se.backend.fake"]
         cls.fake_backend_specific = cls.fake_backend_model.create({"name": "Fake SE"})
         cls.fake_backend = cls.fake_backend_specific.se_backend_id
 
