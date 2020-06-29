@@ -66,6 +66,7 @@ class SeIndex(models.Model):
             domain = []
         return self.search(domain).recompute_all_binding()
 
+    @api.multi
     def force_recompute_all_binding(self):
         for record in self:
             record.recompute_all_binding(force_export=True)
@@ -96,6 +97,7 @@ class SeIndex(models.Model):
                     rec.lang_id.code,
                 )
 
+    @api.multi
     def force_batch_export(self):
         self.ensure_one()
         bindings = self.env[self.model_id.model].search([("index_id", "=", self.id)])
