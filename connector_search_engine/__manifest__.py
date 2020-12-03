@@ -25,5 +25,5 @@
         "data/queue_job_channel_data.xml",
         "data/queue_job_function_data.xml",
     ],
-    "installable": True,
+    "installable": False,
 }
