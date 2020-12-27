@@ -36,12 +36,6 @@ class SeBackendSpecAbstract(models.AbstractModel):
         readonly=False,
     )
 
-    @property
-    def _server_env_fields(self):
-        # We need this because calling `super` in the specific backend
-        # won't call the property from `se.backend` because of `inherits` behavior.
-        return {"index_prefix_name": {}}
-
     @api.model
     def create(self, vals):
         vals["specific_model"] = self._name
