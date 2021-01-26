@@ -5,7 +5,7 @@ setuptools.setup(
     odoo_addon={
         'external_dependencies_override': {
             'python': {
-                'algoliasearch': 'algoliasearch>=1.0.0,<2.0.0',
+                'algoliasearch': 'algoliasearch>=2.0,<3.0',
             }
         }
     }
