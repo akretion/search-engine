@@ -105,7 +105,7 @@ class SeIndex(models.Model):
     def _jobify_batch_export(self, force_export=False):
         self.ensure_one()
         description = _("Prepare a batch export of index '%s'") % self.name
-        self.with_delay(description=description).batch_export(force_export)
+        self.with_delay(description=description).batch_export(force_export=force_export)
 
     @api.model
     def generate_batch_export_per_index(self, domain=None):
@@ -124,7 +124,7 @@ class SeIndex(models.Model):
     @job(default_channel="root.search_engine.prepare_batch_export")
     def batch_export(self, force_export=False):
         self.ensure_one()
-        domain = self._get_domain_for_exporting_binding(force_export)
+        domain = self._get_domain_for_exporting_binding(force_export=force_export)
         binding_obj = self.env[self.model_id.model]
         bindings = binding_obj.with_context(active_test=False).search(domain)
         bindings_count = len(bindings)
