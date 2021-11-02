@@ -5,6 +5,8 @@
 
 import json
 import logging
+import math
+import sys
 
 from odoo import _, api, fields, models
 
@@ -103,13 +105,58 @@ class SeBinding(models.AbstractModel):
             self.env["se.binding.todelete"].sudo().create(todelete_vals_list)
         return super().unlink()
 
-    def jobify_recompute_json(self, force_export=False):
-        description = _("Recompute %s json and check if need update" % self._name)
+    def jobify_recompute_json(self, force_export=False, batch_size=500, retry=True):
         # The job creation with tracking is very costly. So disable it.
-        for record in self.with_context(tracking_disable=True):
-            record.with_delay(description=description).recompute_json(
-                force_export=force_export
+        bindings = self.with_context(tracking_disable=True)
+        while bindings:
+            processing = bindings[0:batch_size]  # noqa: E203
+            bindings = bindings[batch_size:]  # noqa: E203
+
+            # We check if we are currently handling an exception in order
+            # to change the job description.
+            (current_exception, current_exception_value, __) = sys.exc_info()
+            description = (
+                (
+                    _(
+                        "Batch task of %s for recompute %s json after previous "
+                        "batch task raised %s: %s."
+                    )
+                    % (
+                        len(processing),
+                        self._name,
+                        current_exception.__name__,
+                        current_exception_value,
+                    )
+                )
+                if current_exception
+                else (
+                    _("Batch task of %s for recomputing %s json")
+                    % (
+                        len(processing),
+                        self._name,
+                    )
+                )
             )
+
+            processing.with_delay(description=description).recompute_json(
+                force_export=force_export, retry=retry
+            )
+
+    def recompute_json(self, force_export=False, retry=True):
+        try:
+            return self._recompute_json(force_export=force_export)
+        except Exception:
+            # If the batch fails, retry with a half len batch:
+            if retry and len(self) > 1:
+                self.jobify_recompute_json(
+                    force_export=force_export,
+                    batch_size=math.ceil(len(self) / 2),
+                    retry=True,
+                )
+            # We can't systematically reraise here, if we do the new jobs
+            # will be discarded.
+            else:
+                raise
 
     def _work_by_index(self, active=True):
         self = self.exists()
@@ -127,7 +174,7 @@ class SeBinding(models.AbstractModel):
                     yield work
 
     # TODO maybe we need to add lock (todo check)
-    def recompute_json(self, force_export=False):
+    def _recompute_json(self, force_export=False):
         """Compute index record data as JSON."""
         # `sudo` because the recomputation can be triggered from everywhere
         # (eg: an update of a product in the stock) and is not granted
