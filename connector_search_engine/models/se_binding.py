@@ -105,7 +105,7 @@ class SeBinding(models.AbstractModel):
             self.env["se.binding.todelete"].sudo().create(todelete_vals_list)
         return super().unlink()
 
-    def jobify_recompute_json(self, force_export=False, batch_size=500, retry=True):
+    def jobify_recompute_json(self, force_export=False, batch_size=500):
         # The job creation with tracking is very costly. So disable it.
         bindings = self.with_context(tracking_disable=True)
         while bindings:
@@ -139,20 +139,23 @@ class SeBinding(models.AbstractModel):
             )
 
             processing.with_delay(description=description).recompute_json(
-                force_export=force_export, retry=retry
+                force_export=force_export
             )
 
-    def recompute_json(self, force_export=False, retry=True):
+    def recompute_json(self, force_export=False):
         try:
-            return self._recompute_json(force_export=force_export)
-        except Exception:
+            with self.env.cr.savepoint():
+                return self._recompute_json(force_export=force_export)
+        except Exception as e:
             # If the batch fails, retry with a half len batch:
-            if retry and len(self) > 1:
+            if len(self) > 1:
                 self.jobify_recompute_json(
                     force_export=force_export,
                     batch_size=math.ceil(len(self) / 2),
-                    retry=True,
                 )
+                return _(
+                    "Job have been splited due to failling element.\nError: {}"
+                ).format(e)
             # We can't systematically reraise here, if we do the new jobs
             # will be discarded.
             else:
