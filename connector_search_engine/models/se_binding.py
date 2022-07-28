@@ -105,12 +105,14 @@ class SeBinding(models.AbstractModel):
             self.env["se.binding.todelete"].sudo().create(todelete_vals_list)
         return super().unlink()
 
+    def _get_binding_to_process(self, bindings, batch_size):
+        return bindings[0:batch_size], bindings[batch_size:]  # noqa: E203
+
     def jobify_recompute_json(self, force_export=False, batch_size=500):
         # The job creation with tracking is very costly. So disable it.
         bindings = self.with_context(tracking_disable=True)
         while bindings:
-            processing = bindings[0:batch_size]  # noqa: E203
-            bindings = bindings[batch_size:]  # noqa: E203
+            processing, bindings = self._get_binding_to_process(bindings, batch_size)
 
             # We check if we are currently handling an exception in order
             # to change the job description.
