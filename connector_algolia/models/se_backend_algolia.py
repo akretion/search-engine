@@ -10,7 +10,7 @@ from odoo import _, fields, models
 
 from ..utils import get_dict_bytes_size
 
-RECORD_QUOTA = 10000  # bytes
+RECORD_QUOTA = 20000  # bytes
 
 
 class SeBackendAlgolia(models.Model):
