@@ -20,8 +20,6 @@ class SeIndex(models.Model):
     _name = "se.index"
     _description = "Se Index"
 
-    __slots__ = ("_se_adapter", "_model_serializer", "_json_validator")
-
     name = fields.Char(compute="_compute_name", store=True)
     custom_tech_name = fields.Char(
         help="Take control of index technical name. "
@@ -101,12 +99,6 @@ class SeIndex(models.Model):
             else:
                 record.color = 10
 
-    def __init__(self, env, ids=(), prefetch_ids=()):
-        super().__init__(env, ids, prefetch_ids)
-        self._se_adapter = None
-        self._model_serializer = None
-        self._json_validator = None
-
     @api.model
     def _model_id_domain(self):
         se_model_names = [
@@ -131,21 +123,15 @@ class SeIndex(models.Model):
 
     @property
     def se_adapter(self) -> SearchEngineAdapter:
-        if not self._se_adapter:
-            self._se_adapter = self.backend_id.get_adapter(self)
-        return self._se_adapter
+        return self.backend_id.get_adapter(self)
 
     @property
     def model_serializer(self) -> ModelSerializer:
-        if not self._model_serializer:
-            self._model_serializer = self._get_serializer()
-        return self._model_serializer
+        return self._get_serializer()
 
     @property
     def json_validator(self) -> JsonValidator:
-        if not self._json_validator:
-            self._json_validator = self._get_validator()
-        return self._json_validator
+        return self._get_validator()
 
     def _get_serializer(self) -> ModelSerializer:
         raise NotImplementedError
